@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>学活物资与场地借用管理</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="jp-matrix" id="matrixBackground" aria-hidden="true"></div>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">
+            <img src="/assets/student-affairs-logo.png" alt="学生活动中心标识" />
+          </span>
+          <div>
+            <p>学生活动中心</p>
+            <strong>物资与场地</strong>
+          </div>
+        </div>
+
+        <nav class="side-nav radio-container" aria-label="主导航">
+          <input id="navHome" name="mainNav" type="radio" data-view-target="homeView" checked />
+          <label for="navHome">首页</label>
+          <input id="navLoan" name="mainNav" type="radio" data-view-target="loanView" />
+          <label for="navLoan">借用登记</label>
+          <input id="navInventory" name="mainNav" type="radio" data-view-target="inventoryView" />
+          <label for="navInventory">物资库存</label>
+          <input id="navVenue" name="mainNav" type="radio" data-view-target="venueView" />
+          <label for="navVenue">场地管理</label>
+          <input id="navViolation" name="mainNav" type="radio" data-view-target="violationView" />
+          <label for="navViolation">违规记录</label>
+          <input id="navRepository" name="mainNav" type="radio" data-view-target="repositoryView" />
+          <label for="navRepository">数据仓库</label>
+          <input class="admin-only-nav" id="navUsers" name="mainNav" type="radio" data-view-target="userManagementView" />
+          <label class="admin-only-nav" for="navUsers">用户管理</label>
+          <div class="glider-container" aria-hidden="true">
+            <div class="glider"></div>
+          </div>
+        </nav>
+      </aside>
+
+      <div class="content-shell">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="viewEyebrow">首页</p>
+            <h1 id="viewTitle">物资库存概览</h1>
+          </div>
+          <div class="topbar-actions">
+            <div class="account-badge">
+              <span>当前账号</span>
+              <strong id="currentAccountLabel">加载中</strong>
+            </div>
+            <button class="ghost-button" id="logoutButton" type="button">退出</button>
+          </div>
+        </header>
+
+        <main>
+          <section class="view active" id="homeView" data-title="物资库存概览" data-eyebrow="首页">
+            <section class="panel home-calendar-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">场地安排</p>
+                  <h2>本周场地借用</h2>
+                </div>
+                <strong id="homeWeekLabel" class="calendar-month-label">本周</strong>
+              </div>
+              <div class="calendar-shell">
+                <div class="venue-calendar home-venue-calendar" id="homeVenueCalendar" aria-label="本周场地借用日历"></div>
+              </div>
+            </section>
+
+            <section class="panel chart-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">库存统计</p>
+                  <h2>今日物资数量</h2>
+                </div>
+                <strong id="homeInventoryDate" class="calendar-month-label">今天</strong>
+              </div>
+              <div class="bar-chart" id="homeInventoryChart" aria-label="今日物资数量条形统计图"></div>
+            </section>
+          </section>
+
+          <section class="view" id="loanView" data-title="物资借用登记" data-eyebrow="借用登记">
+            <section class="data-section flush-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">物资借用</p>
+                  <h2>借出记录</h2>
+                </div>
+                <div class="toolbar">
+                  <button class="primary-button" id="addLoanButton" type="button">新增</button>
+                  <button class="danger-button" id="deleteLoanButton" type="button">删除</button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="check-cell">
+                        <label class="checkbox-container table-checkbox" title="全选">
+                          <input id="selectAllLoans" class="custom-checkbox" type="checkbox" aria-label="全选借出记录" />
+                          <span class="checkmark"></span>
+                        </label>
+                      </th>
+                      <th>借用人</th>
+                      <th>所属组织</th>
+                      <th>物资</th>
+                      <th>借出日期</th>
+                      <th>预计归还</th>
+                      <th>状态</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="loansBody"></tbody>
+                </table>
+              </div>
+              <div class="pagination-controls" id="loansPagination"></div>
+            </section>
+          </section>
+
+          <section class="view" id="inventoryView" data-title="物资库存" data-eyebrow="物资管理">
+            <section class="panel flush-section">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">库存统计</p>
+                  <h2>按日期查看物资数量</h2>
+                </div>
+                <label class="date-control">
+                  统计日期
+                  <input id="inventorySnapshotDate" type="text" readonly data-date-picker="inventory" />
+                </label>
+              </div>
+              <div class="bar-chart" id="inventoryPageChart" aria-label="指定日期物资数量条形统计图"></div>
+            </section>
+
+            <section class="data-section inventory-table-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">实时统计</p>
+                  <h2>物资库存</h2>
+                </div>
+                <button class="ghost-button" id="addItemButton" type="button">新增</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>名称</th>
+                      <th>尺寸</th>
+                      <th>总数</th>
+                      <th>已借出</th>
+                      <th>可用</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="itemsBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="view" id="venueView" data-title="场地借用管理" data-eyebrow="场地管理">
+            <section class="data-section flush-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">固定场地</p>
+                  <h2>场地借用日历</h2>
+                </div>
+                <div class="toolbar calendar-toolbar">
+                  <button class="ghost-button" id="prevMonthButton" type="button">上个月</button>
+                  <strong id="calendarMonthLabel" class="calendar-month-label">本月</strong>
+                  <button class="ghost-button" id="nextMonthButton" type="button">下个月</button>
+                  <button class="primary-button" id="addVenueBookingButton" type="button">新增</button>
+                </div>
+              </div>
+              <div class="calendar-shell">
+                <div class="venue-calendar" id="venueCalendar" aria-label="场地借用日历"></div>
+              </div>
+            </section>
+          </section>
+
+          <section class="view" id="violationView" data-title="违规记录" data-eyebrow="违规记录">
+            <section class="data-section flush-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">违规登记</p>
+                  <h2>违规记录</h2>
+                </div>
+                <div class="toolbar">
+                  <button class="primary-button" id="addViolationButton" type="button">新增</button>
+                  <button class="danger-button" id="deleteViolationButton" type="button">删除</button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="check-cell">
+                        <label class="checkbox-container table-checkbox" title="全选">
+                          <input id="selectAllViolations" class="custom-checkbox" type="checkbox" aria-label="全选违规记录" />
+                          <span class="checkmark"></span>
+                        </label>
+                      </th>
+                      <th>借用人</th>
+                      <th>所属组织</th>
+                      <th>手机号</th>
+                      <th>损坏物资</th>
+                      <th>处理办法</th>
+                      <th>登记时间</th>
+                    </tr>
+                  </thead>
+                  <tbody id="violationsBody"></tbody>
+                </table>
+              </div>
+              <div class="pagination-controls" id="violationsPagination"></div>
+            </section>
+          </section>
+
+          <section class="view" id="repositoryView" data-title="数据仓库" data-eyebrow="数据仓库">
+            <section class="data-section flush-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">文档资料</p>
+                  <h2>数据仓库</h2>
+                </div>
+                <div class="toolbar">
+                  <button class="ghost-button" id="addRepositoryFolderButton" type="button">新建</button>
+                  <button class="danger-button" id="deleteRepositoryFolderButton" type="button">删除</button>
+                  <button class="primary-button" id="uploadDocumentButton" type="button">上传</button>
+                  <input
+                    id="documentUploadInput"
+                    type="file"
+                    multiple
+                    hidden
+                    accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                  />
+                </div>
+              </div>
+                <div class="repository-manager">
+                  <div class="repository-path-row">
+                    <div>
+                      <p class="eyebrow">当前位置</p>
+                      <nav class="repository-breadcrumb" id="repositoryBreadcrumb" aria-label="当前文件夹路径"></nav>
+                    </div>
+                    <span id="repositoryEntryCount" class="pill">0 项</span>
+                  </div>
+                  <div class="repository-entry-list" aria-label="数据仓库文件列表">
+                    <div class="repository-entry-head" aria-hidden="true">
+                      <span>名称</span>
+                      <span>类型</span>
+                      <span>大小</span>
+                      <span>创建 / 上传时间</span>
+                    </div>
+                    <div id="repositoryEntries"></div>
+                  </div>
+                </div>
+              </section>
+            </section>
+
+          <section class="view" id="userManagementView" data-title="用户管理" data-eyebrow="管理员">
+            <section class="data-section flush-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">账号权限</p>
+                  <h2>用户管理</h2>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>账号</th>
+                      <th>姓名</th>
+                      <th>手机号</th>
+                      <th>身份</th>
+                      <th>审核状态</th>
+                      <th>注册时间</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="trendModal" hidden>
+      <section class="modal trend-modal" role="dialog" aria-modal="true" aria-labelledby="trendModalTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">物资趋势</p>
+            <h2 id="trendModalTitle">十日剩余数量</h2>
+          </div>
+          <button class="icon-button" id="closeTrendModalButton" type="button" aria-label="关闭弹窗">×</button>
+        </div>
+        <p class="trend-range" id="trendModalRange">加载中</p>
+        <div class="trend-chart-area">
+          <div class="trend-y-title">剩余数量</div>
+          <div class="trend-chart" id="itemTrendChart"></div>
+          <div class="trend-x-title">日期</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="itemModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="itemModalTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">物资库存</p>
+            <h2 id="itemModalTitle">新增物资</h2>
+          </div>
+          <button class="icon-button" id="closeItemModalButton" type="button" aria-label="关闭弹窗">×</button>
+        </div>
+        <form id="itemForm" class="form-grid">
+          <input name="id" type="hidden" />
+          <label>
+            物资名称
+            <input name="name" required placeholder="例如：塑料椅" />
+          </label>
+          <label>
+            尺寸
+            <input name="size" placeholder="没有尺寸就填无" value="无" />
+          </label>
+          <label>
+            总数量
+            <input name="total_quantity" required type="number" min="0" placeholder="填写总数量" />
+          </label>
+          <label>
+            单位
+            <input name="unit" placeholder="把 / 张 / 个 / 台" />
+          </label>
+          <div class="modal-actions full-row">
+            <button class="ghost-button" id="cancelItemModalButton" type="button">取消</button>
+            <button class="primary-button" type="submit">保存</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="loanModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="loanModalTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">物资借用</p>
+            <h2 id="loanModalTitle">新增借出记录</h2>
+          </div>
+        </div>
+        <form id="loanForm" class="form-grid">
+          <input name="id" type="hidden" />
+          <label>
+            借用人
+            <input name="borrower" required placeholder="填写姓名" />
+          </label>
+          <label>
+            所属组织
+            <input name="department" placeholder="社团 / 部门 / 班级" />
+          </label>
+          <label>
+            手机号
+            <input
+              name="contact"
+              required
+              type="tel"
+              inputmode="numeric"
+              maxlength="11"
+              pattern="[0-9]{11}"
+              placeholder="填写 11 位手机号"
+              title="手机号必须是 11 位数字"
+            />
+          </label>
+          <label>
+            用途
+            <input name="purpose" placeholder="活动名称或借用原因" />
+          </label>
+          <section class="loan-materials full-row">
+            <div>
+              <p class="eyebrow">借用物资</p>
+              <h3>常用物资</h3>
+            </div>
+            <div class="material-quick-grid" id="quickMaterialGrid"></div>
+            <div class="material-other-grid">
+              <label>
+                库存其他物资
+                <select id="stockOtherItemSelect">
+                  <option value="">请选择剩余物资</option>
+                </select>
+              </label>
+              <label>
+                库存其他数量
+                <input id="stockOtherQuantityInput" type="number" min="0" step="1" value="0" placeholder="填写数量" />
+              </label>
+              <label>
+                手动其他物资（不计库存）
+                <input name="custom_item_name" placeholder="例如：自带展架" />
+              </label>
+              <label>
+                手动其他数量
+                <input name="custom_item_quantity" type="number" min="0" step="1" value="0" placeholder="填写数量" />
+              </label>
+            </div>
+          </section>
+          <label>
+            借出日期
+            <input name="loan_date" type="text" readonly required data-date-picker />
+          </label>
+          <div class="time-field">
+            <span>借用时间</span>
+            <div class="radio-input time-radio-group">
+              <label class="label">
+                <input name="loan_time" type="radio" value="12:40" checked />
+                <span class="text">12:40</span>
+              </label>
+              <label class="label">
+                <input name="loan_time" type="radio" value="17:30" />
+                <span class="text">17:30</span>
+              </label>
+              <label class="label">
+                <input name="loan_time" type="radio" value="21:00" />
+                <span class="text">21:00</span>
+              </label>
+            </div>
+          </div>
+          <label>
+            预计归还日期
+            <input name="due_date" type="text" readonly required data-date-picker />
+          </label>
+          <div class="time-field">
+            <span>归还时间</span>
+            <div class="radio-input time-radio-group">
+              <label class="label">
+                <input name="due_time" type="radio" value="12:40" checked />
+                <span class="text">12:40</span>
+              </label>
+              <label class="label">
+                <input name="due_time" type="radio" value="17:30" />
+                <span class="text">17:30</span>
+              </label>
+              <label class="label">
+                <input name="due_time" type="radio" value="21:00" />
+                <span class="text">21:00</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-actions full-row">
+            <button class="ghost-button" id="cancelLoanModalButton" type="button">取消</button>
+            <button class="primary-button" type="submit">保存</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="venueModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="venueModalTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">场地借用</p>
+            <h2 id="venueModalTitle">新增场地借用</h2>
+          </div>
+        </div>
+        <form id="venueBookingForm" class="form-grid">
+          <input name="id" type="hidden" />
+          <label>
+            借用人
+            <input name="borrower" required placeholder="填写姓名" />
+          </label>
+          <label>
+            所属组织
+            <input name="department" placeholder="社团 / 部门 / 班级" />
+          </label>
+          <label>
+            手机号
+            <input
+              name="contact"
+              required
+              type="tel"
+              inputmode="numeric"
+              maxlength="11"
+              pattern="[0-9]{11}"
+              placeholder="填写 11 位手机号"
+              title="手机号必须是 11 位数字"
+            />
+          </label>
+          <label>
+            用途
+            <input name="purpose" placeholder="活动名称或借用原因" />
+          </label>
+          <label>
+            借用日期
+            <input name="booking_date" type="text" readonly required data-date-picker />
+          </label>
+          <div class="time-field">
+            <span>时间段</span>
+            <div class="radio-input time-radio-group venue-time-group">
+              <label class="label">
+                <input name="time_slots" type="checkbox" value="08:00|12:00" checked />
+                <span class="text">08:00~12:00</span>
+              </label>
+              <label class="label">
+                <input name="time_slots" type="checkbox" value="14:00|17:00" />
+                <span class="text">14:00~17:00</span>
+              </label>
+              <label class="label">
+                <input name="time_slots" type="checkbox" value="19:00|22:00" />
+                <span class="text">19:00~22:00</span>
+              </label>
+            </div>
+          </div>
+          <label>
+            提前布置时间
+            <input name="setup_time" placeholder="不超过一小时" />
+          </label>
+          <label>
+            估计到场人数
+            <input name="estimated_attendance" type="number" min="0" step="1" placeholder="填写人数" />
+          </label>
+          <label>
+            折叠桌借用
+            <input name="folding_table_quantity" type="number" min="0" step="1" value="0" placeholder="填写数量" />
+          </label>
+          <label>
+            塑料椅借用
+            <input name="plastic_chair_quantity" type="number" min="0" step="1" value="0" placeholder="填写数量" />
+          </label>
+          <div class="modal-actions full-row">
+            <button class="danger-button" id="deleteVenueModalButton" type="button" hidden>删除</button>
+            <button class="ghost-button" id="cancelVenueModalButton" type="button">取消</button>
+            <button class="primary-button" type="submit">保存</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="violationModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="violationModalTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">违规记录</p>
+            <h2 id="violationModalTitle">新增违规记录</h2>
+          </div>
+        </div>
+        <form id="violationForm" class="form-grid">
+          <label>
+            借用人
+            <input name="borrower" required placeholder="填写姓名" />
+          </label>
+          <label>
+            所属组织
+            <input name="department" placeholder="社团 / 部门 / 班级" />
+          </label>
+          <label>
+            手机号
+            <input
+              name="contact"
+              required
+              type="tel"
+              inputmode="numeric"
+              maxlength="11"
+              pattern="[0-9]{11}"
+              placeholder="填写 11 位手机号"
+              title="手机号必须是 11 位数字"
+            />
+          </label>
+          <label>
+            损坏物资
+            <input name="damaged_item" required placeholder="填写损坏物资" />
+          </label>
+          <label class="full-row">
+            处理办法
+            <input name="resolution" required placeholder="填写处理办法" />
+          </label>
+          <div class="modal-actions full-row">
+            <button class="ghost-button" id="cancelViolationModalButton" type="button">取消</button>
+            <button class="primary-button" type="submit">保存</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="repositoryFolderModal" hidden>
+      <section class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="repositoryFolderModalTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">数据仓库</p>
+            <h2 id="repositoryFolderModalTitle">新建文件夹</h2>
+          </div>
+        </div>
+        <form id="repositoryFolderForm" class="compact-form">
+          <label>
+            文件夹名称
+            <input name="name" required maxlength="40" placeholder="填写文件夹名称" />
+          </label>
+          <div class="modal-actions">
+            <button class="ghost-button" id="cancelRepositoryFolderButton" type="button">取消</button>
+            <button class="primary-button" type="submit">保存</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="userModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">用户管理</p>
+            <h2 id="userModalTitle">修改用户</h2>
+          </div>
+        </div>
+        <form id="userForm" class="form-grid">
+          <input name="id" type="hidden" />
+          <label>
+            姓名
+            <input name="display_name" required maxlength="20" placeholder="填写姓名" />
+          </label>
+          <label>
+            学号
+            <input name="student_id" required inputmode="numeric" maxlength="10" pattern="[0-9]{10}" placeholder="10 位学号" />
+          </label>
+          <label>
+            手机号
+            <input name="phone" required inputmode="numeric" maxlength="11" pattern="[0-9]{11}" placeholder="11 位手机号" />
+          </label>
+          <label class="full-row">
+            新密码
+            <input name="password" type="password" autocomplete="new-password" placeholder="不修改就留空，至少 6 位" />
+          </label>
+          <div class="modal-actions full-row">
+            <button class="ghost-button" id="cancelUserModalButton" type="button">取消</button>
+            <button class="primary-button" type="submit">保存</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="documentPreviewModal" hidden>
+      <section class="modal document-preview-modal" role="dialog" aria-modal="true" aria-labelledby="documentPreviewTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow" id="documentPreviewMeta">数据仓库</p>
+            <h2 id="documentPreviewTitle">文档预览</h2>
+          </div>
+        </div>
+        <div class="document-preview-content" id="documentPreviewContent"></div>
+        <div class="modal-actions document-preview-actions">
+          <button class="danger-button" id="deletePreviewDocumentButton" type="button">删除</button>
+          <a class="ghost-button document-download-button" id="downloadPreviewDocumentButton" href="#" download>下载</a>
+          <button class="primary-button" id="closeDocumentPreviewButton" type="button">关闭</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="successModal" hidden>
+      <section class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="successModalMessage">
+        <p class="notice-message" id="successModalMessage"></p>
+        <div class="modal-actions">
+          <button class="primary-button" id="confirmSuccessModalButton" type="button">确定</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="confirmModal" hidden>
+      <section class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalMessage">
+        <p class="notice-message" id="confirmModalMessage"></p>
+        <div class="modal-actions">
+          <button class="ghost-button" id="cancelConfirmModalButton" type="button">取消</button>
+          <button class="danger-button" id="acceptConfirmModalButton" type="button">删除</button>
+        </div>
+      </section>
+    </div>
+
+    <button class="theme-toggle-button" id="themeToggleButton" type="button" aria-pressed="false" data-tooltip="切换为深色背景">
+      <span class="theme-toggle-tooltip" aria-hidden="true">
+        <span class="theme-toggle-tooltip-card">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 3s-3.5 3-3.5 9 3.5 9 3.5 9"></path>
+            <path d="M12 3s3.5 3 3.5 9-3.5 9-3.5 9"></path>
+            <path d="M3 12h18"></path>
+            <path d="M4.5 7.5h15"></path>
+            <path d="M4.5 16.5h15"></path>
+          </svg>
+          <span class="theme-toggle-tooltip-text">切换为深色背景</span>
+        </span>
+        <span class="theme-toggle-tooltip-arrow"></span>
+      </span>
+      <span class="theme-toggle-content">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15.43 7.7C7.55 8 3.44 15.23 2.17 19.4c-.09.3.14.6.46.6.19 0 .37-.12.45-.29 2.96-6.29 9.62-7.39 12.43-7.14.24.02.42.23.42.47v2.08c0 .44.53.67.85.36l3.92-3.8c.17-.17.2-.44.06-.64l-3.91-5.71c-.28-.4-.92-.21-.92.28v1.58c0 .28-.23.5-.5.51Z"></path>
+        </svg>
+        <span class="theme-toggle-text">深色背景</span>
+      </span>
+    </button>
+    <div class="custom-date-picker" id="customDatePicker" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>登录 - 学活物资与场地借用管理</title>
+    <style>
+      :root {
+        --accent: #2563eb;
+        --accent-dark: #1d4ed8;
+        --ink: #142033;
+        --muted: #607089;
+        --line: #d9e5f2;
+        --surface-soft: #f8fbff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        padding: 24px 0 74px;
+        display: grid;
+        place-items: center;
+        background:
+          linear-gradient(90deg, rgba(6, 18, 42, 0.34), rgba(6, 18, 42, 0.08)),
+          url("/assets/login-background.jpg") center / cover no-repeat fixed;
+        color: var(--ink);
+        font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      }
+
+      .login-shell {
+        position: relative;
+        z-index: 1;
+        width: min(430px, calc(100% - 32px));
+        padding: 34px 32px;
+        border: 1px solid rgba(255, 255, 255, 0.46);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.28);
+        backdrop-filter: blur(16px) saturate(132%);
+        box-shadow: 0 28px 74px rgba(2, 10, 24, 0.28);
+      }
+
+      .eyebrow {
+        margin: 0 0 6px;
+        color: #f8fbff;
+        font-size: 12px;
+        font-weight: 900;
+        text-shadow: 0 2px 8px rgba(6, 18, 42, 0.46);
+      }
+
+      h1 {
+        margin: 0 0 22px;
+        color: #ffffff;
+        font-size: 26px;
+        letter-spacing: 0;
+        text-shadow: 0 2px 10px rgba(6, 18, 42, 0.42);
+      }
+
+      .mode-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .mode-tab {
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.54);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 900;
+        text-shadow: 0 1px 5px rgba(6, 18, 42, 0.35);
+      }
+
+      .mode-tab.active {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      form {
+        display: grid;
+        gap: 14px;
+      }
+
+      form[hidden] {
+        display: none;
+      }
+
+      label {
+        display: grid;
+        gap: 7px;
+        color: #f8fbff;
+        font-size: 13px;
+        font-weight: 900;
+        text-shadow: 0 1px 6px rgba(6, 18, 42, 0.4);
+      }
+
+      input {
+        width: 100%;
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid rgba(255, 255, 255, 0.52);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+        font: inherit;
+        font-size: 15px;
+        outline: none;
+      }
+
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      }
+
+      .submit-button {
+        height: 44px;
+        margin-top: 4px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        cursor: pointer;
+        font: inherit;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      .submit-button:hover {
+        background: var(--accent-dark);
+      }
+
+      .submit-button:disabled {
+        cursor: wait;
+        opacity: 0.72;
+      }
+
+      .error {
+        min-height: 22px;
+        margin: 14px 0 0;
+        color: #d92d20;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.6;
+      }
+
+      .error.success {
+        color: var(--accent-dark);
+      }
+
+      .beian-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 8px 16px;
+        border-top: 1px solid rgba(217, 229, 242, 0.88);
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 -10px 28px rgba(2, 10, 24, 0.14);
+      }
+
+      .beian-footer a {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.5;
+        text-decoration: none;
+      }
+
+      .beian-footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="login-shell">
+      <p class="eyebrow">华侨大学学生办事大厅</p>
+      <h1 id="pageTitle">学活物资与场地管理登录</h1>
+
+      <div class="mode-tabs" aria-label="登录注册切换">
+        <button class="mode-tab active" data-mode="login" type="button">登录</button>
+        <button class="mode-tab" data-mode="register" type="button">注册</button>
+      </div>
+
+      <form id="loginForm">
+        <label>
+          学号 / 管理员账号
+          <input name="username" required maxlength="20" autocomplete="username" placeholder="请输入 10 位学号或 admin" />
+        </label>
+        <label>
+          密码
+          <input name="password" required type="password" autocomplete="current-password" placeholder="请输入密码" />
+        </label>
+        <button class="submit-button" type="submit">登录</button>
+      </form>
+
+      <form id="registerForm" hidden>
+        <label>
+          姓名
+          <input name="display_name" required maxlength="20" autocomplete="name" placeholder="请输入姓名" />
+        </label>
+        <label>
+          学号
+          <input name="student_id" required inputmode="numeric" maxlength="10" autocomplete="username" placeholder="请输入 10 位学号" />
+        </label>
+        <label>
+          手机号
+          <input name="phone" required inputmode="numeric" maxlength="11" autocomplete="tel" placeholder="请输入 11 位手机号" />
+        </label>
+        <label>
+          密码
+          <input name="password" required type="password" autocomplete="new-password" placeholder="至少 6 位" />
+        </label>
+        <label>
+          确认密码
+          <input name="confirm_password" required type="password" autocomplete="new-password" placeholder="再次输入密码" />
+        </label>
+        <button class="submit-button" type="submit">提交注册</button>
+      </form>
+
+      <p class="error" id="formError" aria-live="polite"></p>
+    </main>
+
+    <footer class="beian-footer">
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">闽ICP备2026023083号</a>
+    </footer>
+
+    <script>
+      const loginForm = document.querySelector("#loginForm");
+      const registerForm = document.querySelector("#registerForm");
+      const errorBox = document.querySelector("#formError");
+      const pageTitle = document.querySelector("#pageTitle");
+      const tabs = Array.from(document.querySelectorAll("[data-mode]"));
+
+      function setMode(mode) {
+        const isRegister = mode === "register";
+        loginForm.hidden = isRegister;
+        registerForm.hidden = !isRegister;
+        pageTitle.textContent = isRegister ? "注册学活管理账号" : "学活物资与场地管理登录";
+        errorBox.textContent = "";
+        tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.mode === mode));
+      }
+
+      function onlyDigits(input, maxLength) {
+        input.value = input.value.replace(/\D/g, "").slice(0, maxLength);
+      }
+
+      async function submitForm(form, path, buttonText, options = {}) {
+        const button = form.querySelector("button[type='submit']");
+        errorBox.textContent = "";
+        errorBox.classList.remove("success");
+        button.disabled = true;
+        button.textContent = "处理中";
+
+        try {
+          const response = await fetch(path, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(Object.fromEntries(new FormData(form).entries())),
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "操作失败，请重试。");
+          if (options.pending) {
+            form.reset();
+            errorBox.textContent = "注册成功，账号正在等待管理员审核。";
+            errorBox.classList.add("success");
+            setMode("login");
+            return;
+          }
+          window.location.href = "/";
+        } catch (error) {
+          errorBox.textContent = error.message;
+          errorBox.classList.remove("success");
+        } finally {
+          button.disabled = false;
+          button.textContent = buttonText;
+        }
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => setMode(tab.dataset.mode));
+      });
+
+      document.querySelectorAll('input[name="student_id"]').forEach((input) => {
+        input.addEventListener("input", () => onlyDigits(input, 10));
+      });
+      document.querySelector('input[name="phone"]').addEventListener("input", (event) => {
+        onlyDigits(event.currentTarget, 11);
+      });
+
+      loginForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitForm(loginForm, "/api/login", "登录");
+      });
+
+      registerForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitForm(registerForm, "/api/register", "提交注册", { pending: true });
+      });
+    </script>
+  </body>
+</html>
